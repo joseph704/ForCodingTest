@@ -1,139 +1,115 @@
 import UIKit
 
-// 버블정렬
-func bubbleSort(unSortedArray: [Int]) -> [Int] {
-    var unSortedArray = unSortedArray
-    for index1 in 0..<unSortedArray.count - 1 {
-        var swap = false
-        for index2 in 0..<unSortedArray.count - 1 - index1 {
-            if unSortedArray[index2] > unSortedArray[index2+1] {
-                let temp = unSortedArray[index2]
-                unSortedArray[index2] = unSortedArray[index2+1]
-                unSortedArray[index2+1] = temp
-                swap = true
+// 버블 정렬
+func bubbleSort(_ array: inout [Int]) {
+    for index1 in 0..<(array.count - 1) {                // 스캔 작업 반복
+        var isSwap = false
+        for index2 in 0..<((array.count - index1) - 1) { // 스캔 작업(인접 인덱스 비교 및 swap 반복) : (탐색하려는 요소의 갯수) - 1 => 탐색하려는 요소의 갯수는 스캔 횟수에 따라 차감됨(스캔 횟수만큼 정렬되어 있을테니)
+            if array[index2] > array[index2 + 1] {
+               array.swapAt(index2, (index2 + 1))
+                isSwap = true
             }
         }
-        if swap == false {
-            break
-        }
+        if isSwap == false { return }
     }
-    return unSortedArray
 }
 
-// 삽입정렬
-func insertionSort(unSortedArray: [Int]) -> [Int] {
-    var unSortedArray = unSortedArray
-    for index in 0..<unSortedArray.count - 1 {
-        for index2 in stride(from: index + 1, to: 0, by: -1) {
-            if unSortedArray[index2-1] > unSortedArray[index2] {
-                let temp = unSortedArray[index2]
-                unSortedArray[index2] = unSortedArray[index2-1]
-                unSortedArray[index2-1] = temp
+// 선택 정렬
+func selectionSort(_ array: inout [Int]) {
+    for stand in 0..<(array.count - 1) {                // 스캔 작업 반복
+        var minIndex = stand
+        for index in (stand + 1)..<array.count {        // 스캔 작업 (stand가 0이면 1번 index부터 마지막 Index까지 돌며 최소값을 찾아야 하니까)
+            if array[index] < array[minIndex] {
+                minIndex = index
+            }
+        }
+        array.swapAt(stand, minIndex)
+    }
+}
+
+// 삽입 정렬
+func insertionSort(_ array: inout [Int]) {
+    for stand in 1..<array.count {
+        for index in stride(from: stand, to: 0, by: -1) {
+            if array[index] < array[index - 1] {
+                array.swapAt(index, index - 1)
             } else {
                 break
             }
         }
     }
-    return unSortedArray
-}
-
-// 선택정렬
-func SelectionSort(unSortedArray: [Int]) -> [Int] {
-    var unSortedArray = unSortedArray
-    for index in 0..<unSortedArray.count - 1 {
-        var min = index // 기준점이 제일 작다고 가정하고 로직시작.
-        for index2 in index+1..<unSortedArray.count {
-            if unSortedArray[min] > unSortedArray[index2] {
-                min = index2
-            }
-        }
-        let temp = unSortedArray[index]
-        unSortedArray[index] = unSortedArray[min]
-        unSortedArray[min] = temp
-    }
-    return unSortedArray
 }
 
 // 동적 계획법
-func fiboDP(num: Int) -> Int {
-    var caches = [Int].init(repeating: 0, count: num + 1)
-    caches[0] = 0
-    caches[1] = 1
+func fibo(_ n: Int) -> Int{
+    var cache: [Int] = [0, 1]
     
-    for index in 2...num {
-        caches[index] = caches[index-1] + caches[index - 2]
+    for num in 2...n {
+        cache.append(cache[num - 1] + cache[num - 2])
     }
-    return caches[num]
+    return cache[n]
 }
 
-// 퀵정렬
+
+// 퀵 정렬
 func quickSort(_ array: [Int]) -> [Int] {
-    if array.count <= 1 {
-        return array
-    }
-    
-    var left = [Int]()
-    var right = [Int]()
-    
-    let pivot = array[0]
-    
-    for index in 1..<array.count {
-        if pivot > array[index] {
-            left.append(array[index])
-        } else {
-            right.append(array[index])
-        }
-    }
+    guard let first = array.first, array.count > 1 else { return array }
+ 
+    let pivot = first
+    let left = array.filter { $0 < pivot }
+    let right = array.filter { $0 > pivot }
     
     return quickSort(left) + [pivot] + quickSort(right)
 }
 
-
-// 병합정렬
-func merge(left: [Int], right: [Int]) -> [Int]{
-    var merged = [Int]()
-    var leftPoint = 0
-    var rightPoint = 0
+// 병합 정렬
+func mergeSort(_ array: [Int]) -> [Int] {
+    if array.count <= 1 { return array }
+    let center = array.count / 2
+    let left = Array(array[0..<center])
+    let right = Array(array[center..<array.count])
     
-    // case1 - left/right 둘다 있을때
-    while left.count > leftPoint && right.count > rightPoint {
-        if left[leftPoint] > right[rightPoint] {
-            merged.append(right[rightPoint])
-            rightPoint = rightPoint + 1
-        } else {
-            merged.append(left[leftPoint])
-            leftPoint = leftPoint + 1
+    func merge(_ left: [Int],_ right: [Int]) -> [Int] {
+        var left = left
+        var right = right
+        var result: [Int] = []
+        
+        while !left.isEmpty && !right.isEmpty {
+            if left[0] < right[0] {
+                result.append(left.removeFirst())
+            } else {
+                result.append(right.removeFirst())
+            }
+        }
+        
+        // 왼쪽 배열의 요소가 남은 경우
+        if !left.isEmpty {
+            result.append(contentsOf: left)
+        }
+        
+        // 오른쪽 배열의 요소가 남은 경우
+        if !right.isEmpty {
+            result.append(contentsOf: right)
+        }
+        
+        return result
+    }
+    
+    return merge(mergeSort(left), mergeSort(right))
+}
+
+// 완전 탐색(Brute force)
+func sequencial(_ array: [Int], num: Int) -> Bool {
+    for element in array {
+        if num == element {
+            return true
         }
     }
-    
-    // case2 - left 데이터가 없을 때
-    while left.count > leftPoint {
-        merged.append(left[leftPoint])
-        leftPoint = leftPoint + 1
-    }
-    
-    // case3 - right 데이터가 없을 때
-    while right.count > rightPoint {
-        merged.append(right[rightPoint])
-        rightPoint = rightPoint + 1
-    }
-    
-    return merged
+    return false
 }
-
-func mergeSplit(dataArray: [Int]) -> [Int] {
-    if dataArray.count <= 1 {
-        return dataArray
-    }
-    let medium = dataArray.count / 2
-    let left = mergeSplit(dataArray: Array(dataArray[..<medium]))
-    let right = mergeSplit(dataArray: Array(dataArray[medium...]))
-    return merge(left: left, right: right)
-}
-
-print(mergeSplit(dataArray: [2,4,6,1,7,4,5,6,442,11]))
 
 // 이진탐색
+// 재귀 함수로 구현하기
 func binarySearch(_ array: [Int], num: Int) -> Bool {
     if array.count == 1 {
         return array[0] == num ? true : false
@@ -143,6 +119,25 @@ func binarySearch(_ array: [Int], num: Int) -> Bool {
     
     return binarySearch(Array(array[range]), num: num)
 }
+
+// 반복문으로 구현하기
+func binarySearch2(_ array: [Int], num: Int) -> Bool {
+    var start = 0
+    var end = (array.count - 1)
+    
+    while start <= end {
+        let mid = (start + end) / 2
+        
+        if array[mid] == num { return true }
+        if array[mid] > num {
+            end = mid - 1
+        } else {
+            start = mid + 1
+        }
+    }
+    return false
+}
+
 
 // 스택
 struct Stack<T> {
@@ -226,3 +221,5 @@ func DFS(graph: [String: [String]], start: String) -> [String] {
     
     return visitedQueue
 }
+
+// 참고: https://babbab2.tistory.com
